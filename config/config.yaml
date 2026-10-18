@@ -1,0 +1,17 @@
+env: test
+
+test:
+  base_url: http://127.0.0.1:5000
+  timeout: 10
+  account:
+    username: admin
+    password: admin123
+  db:
+    # sqlite 开箱即跑；切换到 mysql 时把 type 改成 mysql 并填下面的连接信息
+    type: sqlite
+    path: mock_server/charge_platform.db
+    host: 127.0.0.1
+    port: 3306
+    user: root
+    password: root
+    database: charge_platform

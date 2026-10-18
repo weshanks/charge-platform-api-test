@@ -1,0 +1,37 @@
+# 金额校验用例数据：覆盖正常、极小电量、大额、带优惠
+amount_cases:
+  - case: 1度电无优惠
+    kwh: 1
+    coupon: 0
+    expected_elec: 1.2
+    expected_service: 0.4
+    expected_amount: 1.6
+  - case: 极小电量0.01度
+    kwh: 0.01
+    coupon: 0
+    expected_elec: 0.01
+    expected_service: 0.0
+    expected_amount: 0.01
+  - case: 大额100度带5元优惠
+    kwh: 100
+    coupon: 5
+    expected_elec: 120.0
+    expected_service: 40.0
+    expected_amount: 155.0
+  - case: 33.33度验证四舍五入
+    kwh: 33.33
+    coupon: 0
+    expected_elec: 40.0
+    expected_service: 13.33
+    expected_amount: 53.33
+
+invalid_kwh:
+  - case: 电量为0
+    kwh: 0
+    expect_code: 3001
+  - case: 电量为负
+    kwh: -1
+    expect_code: 3001
+  - case: 电量超上限
+    kwh: 1001
+    expect_code: 3001

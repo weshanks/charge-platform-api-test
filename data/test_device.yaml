@@ -1,0 +1,12 @@
+# 设备用例数据
+add_ok:
+  station_name: 自动化演练充电站
+  power: 120
+
+update_status: fault
+
+paging:
+  page: 1
+  size: 2
+
+invalid_status: unknown_status

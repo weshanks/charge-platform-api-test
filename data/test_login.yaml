@@ -1,0 +1,14 @@
+# 登录鉴权用例数据
+negative:
+  - case: 密码错误
+    username: admin
+    password: wrong_pwd
+    expect_code: 1001
+  - case: 用户名不存在
+    username: not_exist
+    password: admin123
+    expect_code: 1001
+  - case: 缺少 password
+    username: admin
+    password: ""
+    expect_code: 3001
