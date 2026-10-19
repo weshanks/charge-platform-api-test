@@ -123,6 +123,15 @@ class TestOrder:
         assert_status(resp, 200)
         assert_code(resp, 2002)
 
+    @allure.story("停止充电")
+    @allure.title("优惠金额超过应付金额时停止失败")
+    def test_stop_charge_coupon_exceed(self, client):
+        _, order_no = _prepare_charging(client)
+        # 1 度电应付 1.6 元，优惠 10 元超过
+        resp = OrderApi.stop(client, order_no, 1, coupon=10)
+        assert_status(resp, 200)
+        assert_code(resp, 3001)
+
     @allure.story("查询订单")
     @allure.title("订单详情与订单列表可按用户过滤查询")
     def test_order_query(self, client, ctx):

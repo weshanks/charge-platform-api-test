@@ -7,6 +7,7 @@ import allure
 import pytest
 
 from api.device_api import DeviceApi
+from api.order_api import OrderApi
 from common.assert_util import (assert_api_ok, assert_code, assert_db_count,
                                 assert_db_field, assert_equal, assert_status)
 from common.yaml_util import load_case
@@ -75,6 +76,23 @@ class TestDevice:
         resp = DeviceApi.update_status(client, ctx["device_code"], data["invalid_status"])
         assert_status(resp, 200)
         assert_code(resp, 3001)
+
+    @allure.story("查询设备")
+    @allure.title("查询不存在的设备返回 2001")
+    def test_get_nonexistent_device(self, client):
+        resp = DeviceApi.detail(client, "NOT_EXIST_" + _new_code())
+        assert_status(resp, 200)
+        assert_code(resp, 2001)
+
+    @allure.story("启动充电前置")
+    @allure.title("设备状态为 fault 时启动充电失败")
+    def test_start_charge_device_fault(self, client):
+        code = _new_code()
+        DeviceApi.add(client, code, data["add_ok"]["station_name"])
+        DeviceApi.update_status(client, code, "fault")
+        resp = OrderApi.start(client, code, "U10001")
+        assert_status(resp, 200)
+        assert_code(resp, 2002)
 
     @allure.story("删除设备")
     @allure.title("删除设备成功且数据库中不再存在")
