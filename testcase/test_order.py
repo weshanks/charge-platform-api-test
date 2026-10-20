@@ -64,6 +64,19 @@ class TestCharge:
         assert_status(resp, 200)
         assert_code(resp, 3001)
 
+    @allure.story("启动充电")
+    @allure.title("订单结束后同一设备可再次启动，状态机闭环")
+    def test_start_charge_again_after_finished(self, client, db, ctx):
+        device_code, order_no = _prepare_charging(client)
+        assert OrderApi.stop(client, order_no, 1).json()["code"] == 0   # 先结束
+        resp = OrderApi.start(client, device_code, USER_ID)
+        assert_api_ok(resp)
+        new_order = resp.json()["data"]["order_no"]
+        assert_db_field(db, "SELECT * FROM t_order WHERE order_no=%s", (new_order,),
+                        "status", "charging", "再次启动的订单状态")
+        assert_db_field(db, "SELECT * FROM t_device WHERE device_code=%s", (device_code,),
+                        "status", "charging", "设备状态")
+
     @allure.story("未鉴权访问")
     @allure.title("未携带 token 访问受保护接口返回 401")
     def test_stop_charge_without_token(self, cfg, ctx):
@@ -72,6 +85,14 @@ class TestCharge:
         assert_api_ok(resp, expected_code=1002, expected_status=401)
         anon.session.close()
 
+    @allure.story("未鉴权访问")
+    @allure.title("携带非法 token 访问受保护接口返回 1002 与 401")
+    def test_stop_charge_with_invalid_token(self, cfg, ctx):
+        fake = RequestClient(cfg["base_url"])
+        fake.set_token("tk_invalid_token_for_test")
+        resp = OrderApi.stop(fake, ctx["order_no"], 1)
+        assert_api_ok(resp, expected_code=1002, expected_status=401)
+        fake.session.close()
 
 @allure.feature("订单管理")
 class TestOrder:

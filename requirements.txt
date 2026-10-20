@@ -4,3 +4,4 @@ PyYAML==6.0
 allure-pytest==2.13.5
 Flask==2.2.2
 PyMySQL==1.0.2
+pytest-xdist==3.5.0
