@@ -164,3 +164,26 @@ class TestOrder:
         assert_api_ok(lst)
         assert lst.json()["data"]["total"] >= 1, "订单列表应至少有一条"
         assert_equal(len(lst.json()["data"]["list"]) <= 5, True, "分页条数上限")
+
+    @allure.story("查询订单")
+    @allure.title("越界或零条数应返回空列表")
+    @pytest.mark.parametrize("case", data["paging_edge"],
+                             ids=[c["case"] for c in data["paging_edge"]])
+    def test_order_list_paging_edge(self, client, db, case):
+        resp = OrderApi.list(client, page=case["page"], size=case["size"])
+        assert_api_ok(resp)
+        body = resp.json()["data"]
+        assert_equal(len(body["list"]), 0, "越界或零条数应返回空列表")
+        total = db.query_one("SELECT COUNT(1) c FROM t_order")["c"]
+        assert_equal(body["total"], total, "总数应与数据库一致")
+
+    @allure.story("查询订单")
+    @allure.title("按状态过滤订单列表，返回总数与数据库一致")
+    def test_order_list_filter_by_status(self, client, db):
+        _, order_no = _prepare_charging(client)
+        assert OrderApi.stop(client, order_no, 1).json()["code"] == 0   # 造一条 finished
+        resp = OrderApi.list(client, status="finished", page=1, size=20)
+        assert_api_ok(resp)
+        rows = db.query_all("SELECT * FROM t_order WHERE status=%s", ("finished",))
+        assert_equal(resp.json()["data"]["total"], len(rows), "按状态过滤的总数")
+
