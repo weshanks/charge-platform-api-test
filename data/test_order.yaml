@@ -35,3 +35,11 @@ invalid_kwh:
   - case: 电量超上限
     kwh: 1001
     expect_code: 3001
+
+paging_edge:
+  - case: size 为 0 时返回空列表
+    page: 1
+    size: 0
+  - case: page 越界时返回空列表
+    page: 9999
+    size: 10
